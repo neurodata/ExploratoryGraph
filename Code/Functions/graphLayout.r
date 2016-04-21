@@ -17,11 +17,10 @@ graph<- as.undirected(graph, mode="collapse")
 # graphClusters<- cluster_walktrap(graph)
 # members <- membership(graphClusters)
 members <- rep(1,length(V(graph)))
-graph_d3 <- igraph_to_networkD3(graph,members)
+graph_d3 <- igraph_to_networkD3(graph, members)
 
 #Plot it in the fancy & interactive D3!
-forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', Target = 'target', 
-             NodeID = 'name', Group = 'group')
+forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', Target = 'target', NodeID = 'name', Group = 'group')
 
 #Let's compute the adjacency and convert it to a boolean matrix
 
@@ -68,7 +67,7 @@ plot_ly(y=svdL$d)
 
 
 d<- 30
-svdL<- svd(sortedA,nu = d,nv = d)
+svdL<- svd(sortedA)
 # plot(svdL$d)
 sigma<- svdL$d[1:d]
 X<- svdL$u %*% diag( sqrt(sigma))
