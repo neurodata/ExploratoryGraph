@@ -13,6 +13,10 @@ graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format
 
 graph<- as.undirected(graph, mode="collapse")
 
+
+#Plot it in the fancy & interactive D3!
+forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', Target = 'target', NodeID = 'name', Group = 'group')
+
 #Simpel walktrap to cluster the nodes
 # graphClusters<- cluster_walktrap(graph)
 # members <- membership(graphClusters)

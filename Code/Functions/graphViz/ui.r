@@ -21,7 +21,7 @@ shinyUI(fluidPage(
       ),
       checkboxInput(
         inputId = "plot_degree",
-        label = strong("Degree Distribution"),
+        label = strong("Vertex Statistics"),
         value = FALSE
       ),
       checkboxInput(
@@ -38,10 +38,27 @@ shinyUI(fluidPage(
     ),
     mainPanel(
       conditionalPanel("input.plot_layout == true",
-                       uiGraphLayout("layout")),
+                       forceNetworkOutput(outputId = "graph_layout", height = "500px"),
+                       checkboxInput(
+                         inputId = "use_k_core",
+                         label = strong("Use k-core?"),
+                         value = FALSE
+                       ),
+                
+                       uiOutput("KinKcore")
+                       
+                      
+                       ),
       
       conditionalPanel(
         "input.plot_degree == true",
+        
+        selectInput(
+          inputId = "vertex_stats",
+          label = "Vertex Statistics:",
+          choices = c("Degree", "Betweenness Centrality","Closeness Centrality", "Eigenvector Centrality"),
+          selected = "Degree"
+        ),
         
         plotlyOutput(outputId = "density_dist", height = "300px"),
         
