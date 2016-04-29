@@ -1,0 +1,113 @@
+
+R version 3.2.4 (2016-03-10) -- "Very Secure Dishes"
+Copyright (C) 2016 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin13.4.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> require("shiny")
+Loading required package: shiny
+> 
+> runApp("graphViz", port=1234)
+
+Listening on http://127.0.0.1:1234
+Loading required package: plotly
+Loading required package: ggplot2
+
+Attaching package: ‘plotly’
+
+The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+The following object is masked from ‘package:graphics’:
+
+    layout
+
+
+Attaching package: ‘igraph’
+
+The following object is masked from ‘package:plotly’:
+
+    %>%
+
+The following objects are masked from ‘package:stats’:
+
+    decompose, spectrum
+
+The following object is masked from ‘package:base’:
+
+    union
+
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+Warning: Error in [[: subscript out of bounds
+Stack trace (innermost first):
+    71: axis_titles
+    70: plotly_build
+    69: as.widget
+    68: func
+    67: output$density_dist
+     1: runApp
+
+Execution halted

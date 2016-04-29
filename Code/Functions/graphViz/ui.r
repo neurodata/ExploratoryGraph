@@ -40,8 +40,62 @@ shinyUI(fluidPage(
       conditionalPanel("input.plot_layout == true",
                        uiGraphLayout("layout")),
       
-      conditionalPanel("input.plot_degree == true",
-                       uiDegreeDist("degree")),
+      conditionalPanel(
+        "input.plot_degree == true",
+        
+        plotlyOutput(outputId = "density_dist", height = "300px"),
+        
+        checkboxInput(
+          inputId = "show_histogram",
+          label = strong("Show histogram"),
+          value = FALSE
+        ),
+        
+        #show this only if we bin the observations and show it in histogram
+        conditionalPanel(
+          condition = "input.show_histogram == true",
+          sliderInput(
+            inputId = "binwidth",
+            label = "Bin width:",
+            min = 1,
+            max = 50,
+            ticks = T,
+            step = 1,
+            value = 10
+          )
+        ),
+        
+        checkboxInput(
+          inputId = "density",
+          label = strong("Show density estimate"),
+          value = FALSE
+        ),
+        
+        # Display this only if the density is shown
+        conditionalPanel(
+          condition = "input.density == true",
+          sliderInput(
+            inputId = "bw_adjust",
+            label = "Bandwidth adjustment:",
+            min = 0.2,
+            max = 1,
+            value = .5,
+            step = 0.2
+          )
+        )
+        
+        
+        
+        
+        
+        
+        
+      ),
+      
+      
+      
+      
+      
       conditionalPanel(
         "input.plot_adjacencyy == true",
         plotlyOutput(outputId = "adjacency_view", height = 500),

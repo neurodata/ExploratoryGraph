@@ -4,11 +4,10 @@ require("igraph", quietly = T)
 source("degreeDist.r")
 require("networkD3",quietly = T)
 source("opt_d.r")
-setwd("~/git/ExploratoryGraph/Code/Functions/graphViz/")
 
 shinyServer(function(input, output) {
   graph <-
-    read.graph("../../DataIngest/p.pacificus_neural.synaptic_1.graphml",
+    read.graph("./p.pacificus_neural.synaptic_1.graphml",
                format = "graphml")
   graph <- as.undirected(graph, mode = "collapse")
   
@@ -110,7 +109,7 @@ shinyServer(function(input, output) {
         theme(panel.background = element_rect(fill = '#ffffff')) +
         ggtitle("Degree Distribution")
       
-      # ggplotly(p)
+      ggplotly(p)
     }
   })
   output$graph_layout <- renderForceNetwork({
