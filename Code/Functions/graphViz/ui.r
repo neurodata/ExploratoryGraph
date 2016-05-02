@@ -128,8 +128,8 @@ shinyUI(fluidPage(
         plotlyOutput(outputId = "spree_plot", height = 300),
         h1(textOutput("optimal_d")),
         numericInput("spectral_d_to_view", "Number of eigenvalues to keep:", 5),
-        plotlyOutput(outputId = "embeded_scatter", height = 500),
-        numericInput("cluster_K", "Cluster Number (K)", 3)
+        # plotlyOutput(outputId = "embeded_scatter", height = 500),
+        # numericInput("cluster_K", "Cluster Number (K)", 3)
       )
     )
   )

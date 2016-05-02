@@ -27,6 +27,7 @@ shinyServer(function(input, output) {
   
   df <- data.frame(x <- degreeGraph, group <- 1)
   
+
   #densemat
   denseA <- reactive({
     denseA <- as.matrix(A) * 1
@@ -35,6 +36,7 @@ shinyServer(function(input, output) {
     return(denseA)
   })
   
+    {
   #embedding
   
   sortedA <- A[orderByDegree, orderByDegree]
@@ -45,32 +47,20 @@ shinyServer(function(input, output) {
   rownames(L) <- rownames(sortedA)
   colnames(L) <- colnames(sortedA)
   
-  svdL <- reactive({
-    #3D embedding
-    d <- input$spectral_d_to_view
-    svdL <- svd(sortedA, d, d)
-    return(svdL)
-  })
+  svdL <- svd(sortedA)
   
   spree_ev <- reactive({
-    svdL()$d[1:input$spectral_d_to_view]
+    svdL$d[1:input$spectral_d_to_view]
   })
   
   profiled_lik_optimal_d <- reactive({
-    v <- svdL()$d
+    v <- svdL$d
     opt_d(v)
   })
   
-  X <- reactive({
-    sigma <- svdL()$d[1:input$spectral_d_to_view]
-    X <- svdL()$u %*% diag(sqrt(sigma))
-    X
-  })
   
-  spec_cluster <- reactive({
-    kmeans_X <- kmeans(X(), input$cluster_K)
-    kmeans_X$cluster
-  })
+  sigma <- svdL$d
+  X <- svdL$u %*% diag(sqrt(sigma))
   
   
   # d <- callModule(serverDegreeDist, "d")
@@ -131,7 +121,7 @@ shinyServer(function(input, output) {
       ggplotly(p)
     }
   })
-  
+  }
   
   output$KinKcore <- renderUI({
     coreness <- graph.coreness(graph)
@@ -147,6 +137,8 @@ shinyServer(function(input, output) {
     )
   })
   
+
+  
   
   output$graph_layout <- renderForceNetwork({
     if (!input$use_k_core) {
@@ -155,8 +147,6 @@ shinyServer(function(input, output) {
     } else{
       coreness <- graph.coreness(graph)
       maxCoreness <- max(coreness)
-      
-    
       
       verticesHavingMaxCoreness <- which(coreness >= input$par_k_cores)
       kcore <-
@@ -173,40 +163,50 @@ shinyServer(function(input, output) {
       Group = 'group'
     )
     
-    
-    
-    
   })
   
+  
+ 
+    
   output$adjacency_view <-  renderPlotly({
     plot_ly(z = denseA() ,
             type = "heatmap",
             colorscale = "blue")
   })
   
+
   output$spree_plot <-  renderPlotly({
     plot_ly(y = spree_ev())
   })
   
+
   output$optimal_d <- renderText({
     paste(
       "Optimal dimension (suggested by max profiled likelihood), ",
       profiled_lik_optimal_d(),
       sep = ""
     )
-  })
-  
+  })  
+
+  if(FALSE){
+    
+  spec_cluster <- reactive({
+      kmeans_X <- kmeans(X[,input$spectral_d_to_view], input$cluster_K)
+      kmeans_X$cluster
+    })
+    
   output$embeded_scatter <-  renderPlotly({
     plot_ly(
-      x = X()[, 1],
-      y = X()[, 2],
-      z = X()[, 3],
+      x = X[, 1],
+      y = X[, 2],
+      z = X[, 3],
       type = "scatter3d",
-      mode = "markers",
-      color = spec_cluster()
+      mode = "markers"
+      # ,
+      # color = spec_cluster()
     )
   })
-  
-  
+  }
+
   
 })
