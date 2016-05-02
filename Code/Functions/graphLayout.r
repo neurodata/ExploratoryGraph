@@ -9,13 +9,21 @@ require("ggplot2")
 
 setwd("~/git/ExploratoryGraph/Code/Functions/")
 
-graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format = "graphml")
+# graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format = "graphml")
+graph <- read.graph("../DataIngest/kasthuri2015_ramon_v4.graphml",format = "graphml")
 
-graph<- as.undirected(graph, mode="collapse")
+if(!is.connected(graph)){
+  graph<-decompose.graph(graph)[[1]]
+}
 
+# graph<- as.undirected(graph, mode="collapse")
+
+members <- rep(1, length(V(graph)))
+graph_d3 <- igraph_to_networkD3(graph, members)
 
 #Plot it in the fancy & interactive D3!
 forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', Target = 'target', NodeID = 'name', Group = 'group')
+
 
 #Simpel walktrap to cluster the nodes
 # graphClusters<- cluster_walktrap(graph)

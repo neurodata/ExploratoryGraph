@@ -1,15 +1,18 @@
 require("shiny")
 require("plotly")
 
-source("degreeDist.r")
+# source("degreeDist.r")
 source("graphLayout.r")
-source("adjacencyPlot.r")
+# source("adjacencyPlot.r")
 
 
 require("networkD3", quietly = T)
 
 shinyUI(fluidPage(
   titlePanel("Explorer"),
+  
+  fileInput('file1', 'Upload Graph',
+            accept=c('.graphml')),
   
   sidebarLayout(
     position = "left",
@@ -34,21 +37,19 @@ shinyUI(fluidPage(
         label = strong("Spectral Embedding"),
         value = FALSE
       )
-      
     ),
+    
     mainPanel(
-      conditionalPanel("input.plot_layout == true",
-                       forceNetworkOutput(outputId = "graph_layout", height = "500px"),
-                       checkboxInput(
-                         inputId = "use_k_core",
-                         label = strong("Use k-core?"),
-                         value = FALSE
-                       ),
-                
-                       uiOutput("KinKcore")
-                       
-                      
-                       ),
+      conditionalPanel(
+        "input.plot_layout == true",
+        forceNetworkOutput(outputId = "graph_layout", height = "800px"),
+        checkboxInput(
+          inputId = "use_k_core",
+          label = strong("Use k-core?"),
+          value = FALSE
+        ),
+        uiOutput("KinKcore")
+      ),
       
       conditionalPanel(
         "input.plot_degree == true",
@@ -56,7 +57,12 @@ shinyUI(fluidPage(
         selectInput(
           inputId = "vertex_stats",
           label = "Vertex Statistics:",
-          choices = c("Degree", "Betweenness Centrality","Closeness Centrality", "Eigenvector Centrality"),
+          choices = c(
+            "Degree",
+            "Betweenness Centrality",
+            "Closeness Centrality",
+            "Eigenvector Centrality"
+          ),
           selected = "Degree"
         ),
         
@@ -115,6 +121,12 @@ shinyUI(fluidPage(
       
       conditionalPanel(
         "input.plot_adjacencyy == true",
+        selectInput(
+          inputId = "adjacency_mode",
+          label = "View:",
+          choices = c("Adjacency", "Laplacian"),
+          selected = "Adjacency"
+        ),
         plotlyOutput(outputId = "adjacency_view", height = 500),
         selectInput(
           inputId = "adjacency_sortedby",
@@ -127,7 +139,7 @@ shinyUI(fluidPage(
         "input.embedding == true",
         plotlyOutput(outputId = "spree_plot", height = 300),
         h1(textOutput("optimal_d")),
-        numericInput("spectral_d_to_view", "Number of eigenvalues to keep:", 5),
+        numericInput("spectral_d_to_view", "Number of eigenvalues to keep:", 5)
         # plotlyOutput(outputId = "embeded_scatter", height = 500),
         # numericInput("cluster_K", "Cluster Number (K)", 3)
       )
