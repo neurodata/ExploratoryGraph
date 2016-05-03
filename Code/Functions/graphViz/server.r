@@ -4,8 +4,10 @@ require("igraph", quietly = T)
 source("degreeDist.r")
 require("networkD3", quietly = T)
 source("opt_d.r")
+require("pairsD3")
 
 shinyServer(function(input, output) {
+  
   
   # Read in the graph from graphml file
   graphFile <- reactive({
@@ -18,6 +20,7 @@ shinyServer(function(input, output) {
     graph <- as.undirected(graph, mode = "collapse")
     graph
   })
+  
   
   # get adjacency
   Adjacency <- reactive({
@@ -35,25 +38,19 @@ shinyServer(function(input, output) {
   
   # get laplacian
   Laplacian <- reactive({
-    A <- Adjacency()
+    A <- Adjacency() 
     denseA <- as.matrix(A) * 1
     D<- rowSums(denseA)
     D_half <- sqrt(D) 
     denseA <-  diag(1 / D_half) %*% denseA %*% diag(1 / D_half)
     denseA
   })
-  
-  #get SVD
-  
-  SVD <- reactive({
-    A <- Adjacency()
-    svdL <- svd(A)
-    svdL
-  })
-  
+
   
   
   #Compute the max coreness
+  
+  
   
   output$KinKcore <- renderUI({
     graph <- graphFile()
@@ -101,7 +98,7 @@ shinyServer(function(input, output) {
   output$density_dist <- renderPlotly({
     graph <- graphFile()
     A <- Adjacency()
-    
+  
     if (input$plot_degree) {
       if(input$vertex_stats=="Degree"){
         bw <- degree(graph)
@@ -165,7 +162,10 @@ shinyServer(function(input, output) {
   
   #3rd viz: adjacency
   output$adjacency_view <-  renderPlotly({
+    graph <- graphFile()
     A <- Adjacency()
+    L <- Laplacian()
+    svdL <- svd(L)
     
     if(input$adjacency_mode=="Adjacency"){
       denseA <- as.matrix(A) * 1
@@ -187,13 +187,51 @@ shinyServer(function(input, output) {
   
   #4th viz: spree plot
   output$spree_plot <-  renderPlotly({
+    graph <- graphFile()
+    A <- Adjacency()
+    L <- Laplacian()
+    svdL <- svd(L)
     
-    svdL<- SVD()
     spree_ev <- svdL$d[1:input$spectral_d_to_view]
     
     plot_ly(y = spree_ev)
   
     })
+  
+  #5th viz: pairs plot
+  
+  
+  output$max_ev_range <- renderUI({
+    graph <- graphFile()
+    A <- Adjacency()
+    
+    sliderInput("eigenvector_range", "Pick Eigenvectors (max 9):",
+    min = 1, max = nrow(A), value = c(1,5),step = 1)
+  })
+
+  output$pD3 <-  renderPairsD3({
+    
+    graph <- graphFile()
+    A <- Adjacency()
+    L <- Laplacian()
+    svdL <- svd(L)
+    
+    a <- input$eigenvector_range[1]
+    b <- min(input$eigenvector_range[2], input$eigenvector_range[1]+8)
+    
+    u<- svdL$u[,a:b]
+    d<- svdL$d[a:b]
+    X<- u %*% diag(sqrt(d))
+    
+    p<- pairsD3(X)
+  
+    # print(p)
+
+  })
+  
+  output$pairsplot <- renderUI({
+    pairsD3Output("pD3", 100*9,100*9)
+  })
   
   
   
@@ -289,5 +327,5 @@ shinyServer(function(input, output) {
 #   })
 #   }
   
-  
+
 })

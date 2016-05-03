@@ -8,36 +8,54 @@ source("graphLayout.r")
 
 require("networkD3", quietly = T)
 
-shinyUI(fluidPage(
-  titlePanel("Explorer"),
+shinyUI(fluidPage(style="padding-top: 80px;",
+
   
-  fileInput('file1', 'Upload Graph',
-            accept=c('.graphml')),
+  # actionButton("process", "Compute"),
   
-  sidebarLayout(
-    position = "left",
-    sidebarPanel(
-      checkboxInput(
-        inputId = "plot_layout",
-        label = strong("Graph Layout"),
-        value = FALSE
-      ),
-      checkboxInput(
-        inputId = "plot_degree",
-        label = strong("Vertex Statistics"),
-        value = FALSE
-      ),
-      checkboxInput(
-        inputId = "plot_adjacencyy",
-        label = strong("Adjacency Matrix"),
-        value = FALSE
-      ),
-      checkboxInput(
-        inputId = "embedding",
-        label = strong("Spectral Embedding"),
-        value = FALSE
-      )
+  absolutePanel(
+    bottom = 20, right = 20, width = 300,
+    fixed = TRUE,
+    draggable = TRUE,
+    
+    wellPanel(
+      
+    titlePanel("Explorer"),
+    fileInput('file1', 'Upload Graph',
+              accept=c('.graphml')),
+    checkboxInput(
+      inputId = "plot_layout",
+      label = strong("Graph Layout"),
+      value = FALSE
     ),
+    checkboxInput(
+      inputId = "plot_degree",
+      label = strong("Vertex Statistics"),
+      value = FALSE
+    ),
+    checkboxInput(
+      inputId = "plot_adjacencyy",
+      label = strong("Adjacency Matrix"),
+      value = FALSE
+    ),
+    checkboxInput(
+      inputId = "plot_spree",
+      label = strong("Spree & Pairs Plot"),
+      value = FALSE
+    ),
+    checkboxInput(
+      inputId = "plot_embedding",
+      label = strong("Embedding"),
+      value = FALSE
+    )
+    
+    )),
+  # 
+  # sidebarLayout(
+  #   position = "left",
+  #   sidebarPanel(
+  #   
+  #   ),
     
     mainPanel(
       conditionalPanel(
@@ -106,13 +124,6 @@ shinyUI(fluidPage(
             step = 0.2
           )
         )
-        
-        
-        
-        
-        
-        
-        
       ),
       
       
@@ -136,13 +147,13 @@ shinyUI(fluidPage(
         )
       ),
       conditionalPanel(
-        "input.embedding == true",
+        "input.plot_spree == true",
+        numericInput("spectral_d_to_view", "Number of eigenvalues to keep:", 5),
         plotlyOutput(outputId = "spree_plot", height = 300),
-        h1(textOutput("optimal_d")),
-        numericInput("spectral_d_to_view", "Number of eigenvalues to keep:", 5)
-        # plotlyOutput(outputId = "embeded_scatter", height = 500),
-        # numericInput("cluster_K", "Cluster Number (K)", 3)
+        uiOutput("max_ev_range"),
+        uiOutput("pairsplot")
       )
     )
   )
-))
+)
+# )

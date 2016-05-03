@@ -5,12 +5,13 @@ require("networkD3",quietly = T)
 require("d3heatmap")
 require("plotly")
 require("ggplot2")
+require("GGally")
 # require("fields")
 
 setwd("~/git/ExploratoryGraph/Code/Functions/")
 
-# graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format = "graphml")
-graph <- read.graph("../DataIngest/kasthuri2015_ramon_v4.graphml",format = "graphml")
+graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format = "graphml")
+# graph <- read.graph("../DataIngest/kasthuri2015_ramon_v4.graphml",format = "graphml")
 
 if(!is.connected(graph)){
   graph<-decompose.graph(graph)[[1]]
@@ -78,11 +79,11 @@ plot_ly(y=svdL$d)
 #3D embedding
 
 
-d<- 30
+d<- 3
 svdL<- svd(sortedA)
 # plot(svdL$d)
 sigma<- svdL$d[1:d]
-X<- svdL$u %*% diag( sqrt(sigma))
+X<- svdL$u[,1:d] %*% diag( sqrt(sigma))
 
 
 
@@ -112,3 +113,5 @@ forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', 
 
 
 
+###
+ggpairs(X, colour=X[,1], alpha=0.4)
