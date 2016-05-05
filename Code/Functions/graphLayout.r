@@ -44,6 +44,19 @@ adjacency = adjacency>0
 degreeGraph<- rowSums(as.matrix(adjacency))
 orderByDegree<- order(degreeGraph,decreasing = T)
 
+A<- as.matrix(adjacency*1)
+
+require(plyr)
+library(reshape)
+
+
+m<-melt(A)
+
+p <- ggplot(m, aes(X1, X2)) + geom_tile(aes(fill = value), colour = "white") + scale_fill_gradient(low = "white", high = "steelblue") #+ theme(axis.ticks = element_blank(), axis.text.x = element_blank(),axis.text.y = element_blank())
+p
+
+ggplotly(p)
+
 
 #degree dist
 # plot_ly(x = degreeGraph,type = "histogram")
@@ -115,3 +128,14 @@ forceNetwork(Links = graph_d3$links, Nodes = graph_d3$nodes, Source = 'source', 
 
 ###
 ggpairs(X, colour=X[,1], alpha=0.4)
+
+
+
+m<-melt(A)
+
+p <- ggplot(m, aes(X1, X2)) +
+  geom_tile(aes(fill =  value), colour = "white") + scale_fill_gradient(low = "white",  high = "red", limits=c(0,1))
+
+ggplotly(p)
+
+#theme(axis.ticks = element_blank(), axis.text.x = element_blank(),axis.text.y = element_blank())
