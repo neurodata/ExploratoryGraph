@@ -141,7 +141,7 @@ shinyUI(fluidPage(style="padding-top: 80px;",
       selectInput(
         inputId = "adjacency_mode",
         label = "View:",
-        choices = c("Adjacency", "Laplacian"),
+        choices = c("Adjacency", "Laplacian", "Diffusion"),
         selected = "Adjacency"
         ),
 

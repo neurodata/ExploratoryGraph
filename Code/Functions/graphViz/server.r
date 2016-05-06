@@ -204,6 +204,11 @@ shinyServer(function(input, output) {
       denseA<- L
     }
     
+    if(input$adjacency_mode=="Diffusion"){
+      denseA <- as.matrix(A) * 1
+      denseA<- diag(1/rowSums(denseA)) %*% denseA 
+    }
+    
     if (input$adjacency_sortedby == "Degree")   {
       orderByDegree<- order(rowSums(denseA),decreasing = T)
       denseA <- denseA[orderByDegree, orderByDegree]
