@@ -38,7 +38,7 @@ shinyServer(function(input, output) {
     A
   })
   
-  # get laplacian
+  # get normalized laplacian
   Laplacian <- reactive({
     A <- Adjacency() 
     denseA <- as.matrix(A) * 1
