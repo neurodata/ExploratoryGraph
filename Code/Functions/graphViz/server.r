@@ -13,7 +13,7 @@ shinyServer(function(input, output) {
   graphFile <- reactive({
     
     if(input$use_demo_graph)
-      inFile<- "../../DataIngest/p.pacificus_neural.synaptic_1.graphml"
+      inFile<- "./demo.graphml"
     else
       inFile<-input$file1$datapath
     
@@ -31,15 +31,17 @@ shinyServer(function(input, output) {
     graph <- graphFile()
     coreness <- graph.coreness(graph, "all")
     maxCoreness <- max(coreness)
-    sliderInput(
-      inputId = "par_k_cores",
-      label = "K:",
-      min = 1,
-      max = maxCoreness,
-      ticks = T,
-      step = 1,
-      value = 10
-    )
+    if(input$use_k_core){
+      sliderInput(
+        inputId = "par_k_cores",
+        label = "K:",
+        min = 1,
+        max = maxCoreness,
+        ticks = T,
+        step = 1,
+        value = 10
+      )
+    }
   })
   
   #simplified graph with k core
@@ -47,9 +49,11 @@ shinyServer(function(input, output) {
     g<- graphFile()
     if(input$use_k_core){
       coreness <- graph.coreness(g, "all")
-      verticesHavingMaxCoreness <- which(coreness >= input$par_k_cores)
+      verticesHavingMaxCoreness <- which(coreness >=  
+        input$par_k_cores)
       g <- induced.subgraph(graph = g, vids = verticesHavingMaxCoreness)
     }
+
     g
   })
   
@@ -94,12 +98,12 @@ shinyServer(function(input, output) {
     # L<- Laplacian()
     # A <- Adjacency() 
 
-    if(input$svd_mat=="Adjacency")
-      svdL <- svd(Adjacency())
-    if(input$svd_mat=="Normalized Laplacian")
-      svdL <- svd(Laplacian())
-    if(input$svd_mat=="Laplacian")
-      svdL <- svd(subLaplacian())
+    # if(input$svd_mat=="Adjacency")
+        svdL <- svd(Adjacency())
+    # if(input$svd_mat=="Normalized Laplacian")
+      # svdL <- svd(Laplacian())
+    # if(input$svd_mat=="Laplacian")
+      # svdL <- svd(subLaplacian())
     
     u<- svdL$u[,1:input$embedding_d]
     d<- svdL$d[1:input$embedding_d]
@@ -117,32 +121,15 @@ shinyServer(function(input, output) {
     graph <- graph_kcore()
     
     
-
-    
-    if (!input$use_k_core) {
       members <- rep(1, length(V(graph)))
-      if(input$embedding_sbm){
+      
+      if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
         members = Cluster()$cluster
-      }
-      graph_d3 <- igraph_to_networkD3(graph, members)
-    } else{
-      coreness <- graph.coreness(graph)
-      maxCoreness <- max(coreness)
+        # members<- members[coreness >= input$par_k_cores]    
+    }
 
-      verticesHavingMaxCoreness <- which(coreness >= input$par_k_cores)
+     graph_d3 <- igraph_to_networkD3(graph, members)
       
-
-      
-      kcore <-
-      induced.subgraph(graph = graph, vids = verticesHavingMaxCoreness)
-      members <- rep(1, length(V(kcore)))
-      
-      if(input$embedding_sbm){
-        members = Cluster()$cluster
-        members<- members[coreness >= input$par_k_cores]    }
-
-        graph_d3 <- igraph_to_networkD3(kcore, members)
-      }
       forceNetwork(
         Links = graph_d3$links,
         Nodes = graph_d3$nodes,
@@ -159,28 +146,39 @@ shinyServer(function(input, output) {
     A <- Adjacency()
 
     if (input$plot_degree) {
-      if(input$vertex_stats=="Degree"){
+      if(input$graph_stats=="Degree"){
         bw <- degree(graph)
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = 1
       }
-      if(input$vertex_stats=="Betweenness Centrality"){
+      if(input$graph_stats=="Betweenness Centrality"){
         bw <- betweenness(graph)
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = (quantile(bw,0.6)-quantile(bw,0.4))/20
       }
-      if(input$vertex_stats=="Closeness Centrality"){
+      if(input$graph_stats=="Closeness Centrality"){
         bw <- closeness(graph)
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
-      if(input$vertex_stats=="Eigenvector Centrality"){
+      if(input$graph_stats=="Eigenvector Centrality"){
         eg<- evcent(graph)
         bw <- eg$vector
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
+
+    if(input$graph_stats=="Bonacich Power Centrality"){
+        bw<- power_centrality(graph)
+        df <- data.frame(x <- bw, group <- 1)
+        min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
+      }
       
+    if(input$graph_stats=="Authority Score"){
+        bw<- authority_score(graph)$vector
+        df <- data.frame(x <- bw, group <- 1)
+        min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
+      }
 
       p <- ggplot(df, aes(x)) +
       geom_histogram(
@@ -213,7 +211,7 @@ shinyServer(function(input, output) {
     if (input$plot_degree) {
       p <- p +
       theme(panel.background = element_rect(fill = '#ffffff')) +
-      ggtitle(input$vertex_stats)
+      ggtitle(input$graph_stats)
       
       ggplotly(p)
     }
@@ -227,19 +225,19 @@ shinyServer(function(input, output) {
 
     if(input$adjacency_mode=="Adjacency"){
       denseA <- as.matrix(A) * 1
-      caption <- "Adjacency: A"
+      # caption <- "Adjacency: A"
       
     }
     
     if(input$adjacency_mode=="Laplacian"){
       denseA<- subLaplacian()
-      caption <- "Laplacian: D-A"
+      # caption <- "Laplacian: D-A"
       
       }
     
     if(input$adjacency_mode=="Normalized Laplacian"){
       denseA<- L
-      caption <- "Normalized Laplacian: D^{-1/2}A D^{-1/2}"
+      caption <- expression(D^(-1/2)*A *D^(-1/2))
       
     }
     
@@ -249,6 +247,8 @@ shinyServer(function(input, output) {
       caption <- "Diffusion: D^{-1}A"
       
     }
+
+
     
     if (input$adjacency_sortedby == "Degree")   {
       orderByDegree<- order(rowSums(denseA),decreasing = T)
@@ -278,11 +278,18 @@ shinyServer(function(input, output) {
 
     m<-melt(denseA)
 
+    zlim <- c(0,1)
+
+    if(input$adjacency_mode=="Laplacian")
+      zlim<- c(min(denseA),max(denseA))
+
 
     p <- ggplot(m, aes(X1, X2)) +
     geom_tile(aes(fill =  value), colour = "white") + 
-    scale_fill_gradient(low = "white",  high = "red", limits=c(0,1)) +
-    theme(axis.ticks = element_blank(), axis.text.x = element_blank(),axis.text.y = element_blank()) + labs(title = caption)
+    scale_fill_gradient(low = "white",  high = "red", limits=zlim) +
+    theme(axis.ticks = element_blank(), axis.text.x = element_blank(),axis.text.y = element_blank()) 
+    # + labs(title = paste(caption) )
+
 
     ggplotly(p)
 
@@ -310,8 +317,30 @@ shinyServer(function(input, output) {
   })
   
   
-  output$caption_adjacency <- renderText({ 
+  output$caption_adjacency <- renderUI({ 
     
+    if (input$adjacency_mode == "Adjacency")   {
+      caption = 'Adjacency: \\(A\\)'
+    }
+
+        if (input$adjacency_mode == "Laplacian")   {
+      caption = 'Laplacian: \\(D-A\\)'
+    }
+
+    if (input$adjacency_mode == "Normalized Laplacian")   {
+      caption = 'Normalized Laplacian: \\(D^{1/2}AD^{1/2}\\)'
+    }
+
+    if (input$adjacency_mode == "Diffusion")   {
+      caption = 'Diffusion: \\(D^{-1}A\\)'
+    }
+
+     
+
+      withMathJax(
+      helpText(caption)
+      )
+
   })
 
   output$p_hat_view <- renderPlotly({
@@ -327,12 +356,12 @@ shinyServer(function(input, output) {
       
       if( input$embedding_model == 'Random Dot Product Model'){
         
-        if(input$svd_mat=="Adjacency")
+        # if(input$svd_mat=="Adjacency")
           svdL <- svd(Adjacency())
-        if(input$svd_mat=="Normalized Laplacian")
-          svdL <- svd(Laplacian())
-        if(input$svd_mat=="Laplacian")
-          svdL <- svd(subLaplacian())
+        # if(input$svd_mat=="Normalized Laplacian")
+          # svdL <- svd(Laplacian())
+        # if(input$svd_mat=="Laplacian")
+          # svdL <- svd(subLaplacian())
         
         u<- svdL$u[,1:input$embedding_d]
         d<- svdL$d[1:input$embedding_d]
@@ -342,9 +371,6 @@ shinyServer(function(input, output) {
       }
      
       
-
-
-
       if (input$adjacency_sortedby == "Degree")   {
         A <- Adjacency()
         denseA <- as.matrix(A) * 1
@@ -395,44 +421,66 @@ shinyServer(function(input, output) {
   })
 
   
-  #4th viz: spree plot
-  output$spree_plot <-  renderPlotly({
+  #4th viz: scree plot
+  output$scree_plot <-  renderPlotly({
     graph <- graph_kcore()
    
-    if(input$svd_mat=="Adjacency")
-      svdL <- svd(Adjacency())
-    if(input$svd_mat=="Normalized Laplacian")
-      svdL <- svd(Laplacian())
-    if(input$svd_mat=="Laplacian")
-      svdL <- svd(subLaplacian())
-    
-    spree_ev <- svdL$d
-    
-    n<- length(spree_ev)
+
+    p<- ggplot() 
+
+    n<- length(V(graph))
     x<- c(1:n)
-    y<- spree_ev
-    z<- rep(1,n)
+
+
+    df2 <- data.frame( index= x)
+
+
+    if(input$scree_A){
+        svdL <- svd(Adjacency())
+
+        y <- svdL$d  
+
+        df2$Adjacency = y
+    }
+
+   if(input$scree_L){
+        svdL <- svd(subLaplacian())
+
+        y <- svdL$d  
+
+        df2$Laplacian = y
+
+    }
+
+    if(input$scree_nL){
+        svdL <- svd(Laplacian())
+
+        y <- svdL$d  
+
+        df2$"Normalized Laplacian" = y
+    }
+
+    df3 = melt(df2, id=c("index"))
+
+
     
     
+    p<- ggplot(df3) + geom_line(aes(x=index, y=value, colour=variable))    + scale_colour_discrete(name="")
+
     if (input$elbow_detect) {
+        y<- df2$Laplacian
       eb1 <- opt_d(y)
       if (eb1 < n) {
-        z[(eb1 + 1):n] <- 2
         eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
-        
         if (eb2 < n) {
-          z[(eb2 + 1):n] <- 3
           eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
-          if (eb3 < n)
-            z[(eb3 + 1):n] <- 4
         }
       }
+      p<- p+  geom_vline(xintercept = eb1, linetype =2)+ geom_vline(xintercept = eb2, linetype = 3)+ geom_vline(xintercept = eb3, linetype =4)
     }
-    
-    df2 <- as.data.frame(cbind( x,y,z ))
-    
-                                    
-    p<- ggplot(df2, aes(x=x, y=y, col=z)) + geom_line()
+
+   
+
     
     ggplotly(p)
     
@@ -441,34 +489,24 @@ shinyServer(function(input, output) {
   
   #5th viz: pairs plot
   
-  
-  output$max_ev_range <- renderUI({
-    graph <- graph_kcore()
-    A <- Adjacency()
-    
-    sliderInput("eigenvector_range", "View Eigenvectors (up to 9):",
-      min = 1, max = nrow(A), value = c(1,5),step = 1)
-  })
-
   output$pD3 <-  renderPairsD3({
 
-    graph <- graph_kcore()
+    graph <- graphFile()
     A <- Adjacency()
-    L <- Laplacian()
-    if(input$svd_mat=="Adjacency")
-      svdL <- svd(Adjacency())
-    if(input$svd_mat=="Normalized Laplacian")
-      svdL <- svd(Laplacian())
-    if(input$svd_mat=="Laplacian")
-      svdL <- svd(subLaplacian())
+    # L <- Laplacian()
+    # if(input$svd_mat=="Adjacency")
+    svdL <- svd(A)
+    # if(input$svd_mat=="Normalized Laplacian")
+      # svdL <- svd(Laplacian())
+    # if(input$svd_mat=="Laplacian")
+      # svdL <- svd(subLaplacian())
     
     a <- input$eigenvector_range[1]
     b <- min(input$eigenvector_range[2], input$eigenvector_range[1]+8)
     
 
     
-    if(input$embedding_sbm){
-
+      if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
       group_col = Cluster()$cluster
     }else{
       group_col = rep(1,nrow(A))
@@ -477,17 +515,13 @@ shinyServer(function(input, output) {
     u<- svdL$u[,a:b]
     d<- svdL$d[a:b]
     X<- u %*% diag(sqrt(d))
-    p<- pairsD3(X,cex = 5, group=group_col)
-
-    
-    
-
+    p<- pairsD3(X,cex = 5, group=group_col)   
     # print(p)
 
   })
   
   output$pairsplot <- renderUI({
-    pairsD3Output("pD3", 100*9,100*9)
+    pairsD3Output("pD3", width = '500px', height = '500px')
   })
   
   
