@@ -457,7 +457,7 @@ shinyServer(function(input, output) {
 
         y <- svdL$d  
 
-        df2$"Normalized Laplacian" = y
+        df2$nL = y
     }
 
     df3 = melt(df2, id=c("index"))
@@ -468,19 +468,62 @@ shinyServer(function(input, output) {
     p<- ggplot(df3) + geom_line(aes(x=index, y=value, colour=variable))    + scale_colour_discrete(name="")
 
     if (input$elbow_detect) {
-        y<- df2$Laplacian
+
+        if(input$scree_A){
+     
+      
+          y<- df2$Adjacency
+      
+
+        eb1 <- opt_d(y)
+      
+        if (eb1 < n) {
+          eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
+          if (eb2 < n) {
+            eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+          }
+        }
+        p<- p+  geom_vline(xintercept = eb1, linetype =2, col="red")+ geom_vline(xintercept = eb2, linetype = 2, col="red")+ geom_vline(xintercept = eb3, linetype =2, col="red")
+      }
+
+      
+
+
+      
+      if(input$scree_L){
+      
+      y<- df2$Laplacian
+      
+
       eb1 <- opt_d(y)
+    
       if (eb1 < n) {
         eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
         if (eb2 < n) {
           eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
         }
       }
-      p<- p+  geom_vline(xintercept = eb1, linetype =2)+ geom_vline(xintercept = eb2, linetype = 3)+ geom_vline(xintercept = eb3, linetype =4)
-    }
+      p<- p+  geom_vline(xintercept = eb1, linetype =2, col="green")+ geom_vline(xintercept = eb2, linetype = 2, col="green")+ geom_vline(xintercept = eb3, linetype =2, col="green")
+      }
 
+
+ if(input$scree_nL){
+      y<- df2$nL
    
+      
 
+      eb1 <- opt_d(y)
+    
+      if (eb1 < n) {
+        eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
+        if (eb2 < n) {
+          eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+        }
+      }
+      p<- p+  geom_vline(xintercept = eb1, linetype =2, col="blue")+ geom_vline(xintercept = eb2, linetype = 2, col="blue")+ geom_vline(xintercept = eb3, linetype =2, col="blue")
+      }
+
+          }  
     
     ggplotly(p)
     
