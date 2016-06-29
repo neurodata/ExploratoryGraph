@@ -9,8 +9,20 @@ g <- read.graph("./graphViz/demo.graphml",format = "graphml")
 get.graph.attribute(g)
 get.vertex.attribute(g)
 l <- edge_attr(g)
+length(l)
 
+require("ggplot2")
 
+dg<- degree(g)
+group<-c(rep(1,35),rep(2,35))
+df <- data.frame(x <- dg, group <- factor(group))
+names(df)<- c("x","group")
+p <- ggplot(df, aes(x=x, fill=group)) +
+  geom_histogram(
+    position="identity",binwidth = 1,
+  alpha=.5
+  )
+p
 # 
 if(!is.connected(graph)){
   g<-decompose.graph(g)[[1]]

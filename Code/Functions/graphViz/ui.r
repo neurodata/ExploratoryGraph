@@ -20,8 +20,31 @@ body <- dashboardBody(fluidRow(
 
   column(
     width = 9,
+
+     #Distribution
+    box(
+      width = NULL,
+      solidHeader = TRUE,
+      conditionalPanel(
+        "input.plot_vertex_dist == true",
+                
+        plotlyOutput(outputId = "vertex_dist", height = "300px"),
+         sliderInput(
+            inputId = "bw_adjust_overlay",
+            label = "Bandwidth adjustment:",
+            min = 0.2,
+            max = 2,
+            value = .5,
+            step = 0.2
+            )
+        
+      )),
+    ##end  distribution
+
+
+
     
-    #Vertex Distribution
+    #Distribution
     box(
       width = NULL,
       solidHeader = TRUE,
@@ -85,7 +108,7 @@ body <- dashboardBody(fluidRow(
           )
         )
       ),
-    ##end vertex distribution
+    ##end  distribution
     
     # adjacency view
     box(
@@ -191,13 +214,22 @@ body <- dashboardBody(fluidRow(
       width = NULL,
       
       
-      checkboxInput("use_demo_graph", "Demo Graph",  value = TRUE),
+
       
       
       fileInput('file1', 'Upload Graph',
         accept = c('.graphml')),
+
+       checkboxInput("use_demo_graph", "Use Demo Graph",  value = TRUE),
       
       
+      
+      checkboxInput(
+        inputId = "plot_vertex_dist",
+        label = strong("Vertex Statistics"),
+        value = FALSE
+        ),
+
       
       checkboxInput(
         inputId = "plot_degree",

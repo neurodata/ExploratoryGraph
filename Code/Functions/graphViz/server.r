@@ -140,8 +140,37 @@ shinyServer(function(input, output) {
       zoom = TRUE
       )
   })
-  
-  #2nd viz:vertex stats
+
+  # vertex stats
+  output$vertex_dist <- renderPlotly({
+
+    graph <- graph_kcore()
+    dg <- degree(graph)
+
+    block<- rep(1, length(dg))
+
+    if(      input$embedding_sbm){
+    block <- Cluster()$cluster
+    }
+
+    df <- data.frame(x <- dg, block <- factor(block))
+    names(df)<- c("x","block")
+
+
+    p <- ggplot(df, aes(x=x, fill=block)) + geom_density(alpha = 0.7, adjust = input$bw_adjust_overlay)+   ggtitle("Degree in each Block")
+
+    # geom_histogram(
+    #  position="identity",
+    #   aes(y = ..density..),
+    #     alpha = 0.7,
+    #     binwidth = 1
+    #   )  
+    ggplotly(p)
+
+
+  })
+
+  #2nd viz:graph stats
   output$density_dist <- renderPlotly({
     # g<- graphFile()
     graph <- graph_kcore()
