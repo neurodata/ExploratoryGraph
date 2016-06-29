@@ -16,8 +16,8 @@ header <- dashboardHeader(title = "GraphX")
 
 
 body <- dashboardBody(fluidRow(
-  
-  
+
+
   column(
     width = 9,
     
@@ -38,9 +38,9 @@ body <- dashboardBody(fluidRow(
             "Eigenvector Centrality",
             "Bonacich Power Centrality",
             "Authority Score"
-          ),
+            ),
           selected = "Degree"
-        ),
+          ),
         
         plotlyOutput(outputId = "density_dist", height = "300px"),
         
@@ -48,7 +48,7 @@ body <- dashboardBody(fluidRow(
           inputId = "show_histogram",
           label = strong("Show histogram"),
           value = FALSE
-        ),
+          ),
         
         #show this only if we bin the observations and show it in histogram
         conditionalPanel(
@@ -61,14 +61,14 @@ body <- dashboardBody(fluidRow(
             ticks = F,
             step = 1,
             value = 10
-          )
-        ),
+            )
+          ),
         
         checkboxInput(
           inputId = "density",
           label = strong("Show density estimate"),
           value = FALSE
-        ),
+          ),
         
         # Display this only if the density is shown
         conditionalPanel(
@@ -80,10 +80,10 @@ body <- dashboardBody(fluidRow(
             max = 1,
             value = .5,
             step = 0.2
+            )
           )
         )
-      )
-    ),
+      ),
     ##end vertex distribution
     
     # adjacency view
@@ -91,6 +91,7 @@ body <- dashboardBody(fluidRow(
       width = NULL,
       solidHeader = TRUE,
       
+
       conditionalPanel(
         "input.plot_adjacencyy == true",
         selectInput(
@@ -98,27 +99,31 @@ body <- dashboardBody(fluidRow(
           label = "View:",
           choices = c("Adjacency", "Laplacian", "Normalized Laplacian", "Diffusion"),
           selected = "Adjacency"
-        ),
-        
+          ),
         
         
         uiOutput("caption_adjacency"),
         
-        plotlyOutput(
-          outputId = "adjacency_view",
-          height = 500,
-          width = 600
-          
-        ),
-        
-        conditionalPanel(
-          "input.embedding_sbm == true",
-          plotlyOutput(
-            outputId = "p_hat_view",
-            height = 500,
-            width = 600
+        fluidRow(
+          splitLayout(cellWidths = c("50%", "50%"),
+
+            plotlyOutput(
+              outputId = "adjacency_view",
+              height = 500,
+              width = 600
+              
+              ),
+            
+            conditionalPanel(
+              "input.embedding_sbm == true",
+              plotlyOutput(
+                outputId = "p_hat_view",
+                height = 500,
+                width = 600
+                )
+              )
+            )
           )
-        )
         ,
         
         selectInput(
@@ -126,11 +131,11 @@ body <- dashboardBody(fluidRow(
           label = "Sorted By:",
           choices = c("Unsorted", "Degree", "Block"),
           selected = "Unsorted"
+          )
+        
+        
         )
-        
-        
-      )
-    ),
+      ),
     
     # end adjacency view
     
@@ -142,8 +147,8 @@ body <- dashboardBody(fluidRow(
       conditionalPanel(
         "input.plot_layout == true",
         forceNetworkOutput(outputId = "graph_layout", height = "500px")
-      )
-    ),
+        )
+      ),
     # end layout
     
     
@@ -162,9 +167,9 @@ body <- dashboardBody(fluidRow(
           inputId = "elbow_detect",
           label = strong("Elbow Detection"),
           value = FALSE
+          )
         )
-      )
-    ),
+      ),
     
     #end scree plot
     #pairs plot
@@ -174,10 +179,10 @@ body <- dashboardBody(fluidRow(
       ,
       
       conditionalPanel("input.plot_pairs == true",
-                       uiOutput("pairsplot"))
-    )
+       uiOutput("pairsplot"))
+      )
     #end pairs plot
-  ),
+    ),
 
   column(
     width = 3,
@@ -189,7 +194,7 @@ body <- dashboardBody(fluidRow(
       
       
       fileInput('file1', 'Upload Graph',
-                accept = c('.graphml')),
+        accept = c('.graphml')),
       
       
       
@@ -197,23 +202,23 @@ body <- dashboardBody(fluidRow(
         inputId = "plot_degree",
         label = strong("Graph Statistics"),
         value = FALSE
-      ),
+        ),
       checkboxInput(
         inputId = "plot_adjacencyy",
         label = strong("Adjacency Matrix"),
         value = FALSE
-      ),
+        ),
       checkboxInput(
         inputId = "plot_layout",
         label = strong("Graph Layout"),
         value = FALSE
-      ),
+        ),
       
       checkboxInput(
         inputId = "plot_scree",
         label = strong("Scree Plot"),
         value = TRUE
-      ),
+        ),
 
 
       conditionalPanel(
@@ -224,25 +229,25 @@ body <- dashboardBody(fluidRow(
             inputId = "scree_A",
             label = strong("Adjacency"),
             value = TRUE
-          ),
+            ),
           checkboxInput(
             inputId = "scree_L",
             label = strong("Laplacian"),
             value = TRUE
-          ),
+            ),
           checkboxInput(
             inputId = "scree_nL",
             label = strong("Normalized Laplacian"),
             value = TRUE
+            )
           )
-        )
-      ),
+        ),
       
       checkboxInput(
         inputId = "plot_pairs",
         label = strong("Pairs Plot"),
         value = FALSE
-      ),
+        ),
       
       conditionalPanel(
         "input.plot_pairs == true",
@@ -254,12 +259,12 @@ body <- dashboardBody(fluidRow(
           ,
           value = c(1, 5),
           step = 1
-        )
+          )
         # uiOutput("max_ev_range")
-      )),
-      
-      
-      
+        )),
+
+
+
       # selectInput(
       #   inputId = "svd_mat",
       #   label = "Using the spectral decomp of",
@@ -268,15 +273,15 @@ body <- dashboardBody(fluidRow(
       #     "Laplacian"),
       #   selected = "Normalized Laplacian"
       #   ),
-      
-      box(
-              width = NULL,
+
+    box(
+      width = NULL,
 
       checkboxInput(
         inputId = "embedding_sbm",
         label = strong("Embedding?"),
         value = FALSE
-      ),
+        ),
       conditionalPanel(
         "input.embedding_sbm == true",
         
@@ -284,9 +289,9 @@ body <- dashboardBody(fluidRow(
           inputId = "embedding_model",
           label = "Model",
           choices = c("Random Dot Product Model",
-                      "Stochastic Block Model"),
+            "Stochastic Block Model"),
           selected = "Stochastic Block Model"
-        ),
+          ),
         
         sliderInput(
           inputId = "embedding_d",
@@ -296,7 +301,7 @@ body <- dashboardBody(fluidRow(
           ticks = T,
           step = 1,
           value = 5
-        ),
+          ),
         
         conditionalPanel(
           "input.embedding_model == 'Stochastic Block Model'",
@@ -308,18 +313,18 @@ body <- dashboardBody(fluidRow(
             ticks = T,
             step = 1,
             value = 5
+            )
           )
-        )
-      ),
+        ),
       
       checkboxInput(
         inputId = "use_k_core",
         label = strong("Use k-core?"),
         value = FALSE
-      ),
+        ),
       
       conditionalPanel("input.use_k_core == true",
-                       uiOutput("KinKcore"))
+       uiOutput("KinKcore"))
       
       #     sliderInput(
       # inputId = "par_k_cores",
@@ -333,16 +338,16 @@ body <- dashboardBody(fluidRow(
       
       
       
+      )
     )
-  )
   
   
   
   
   
-))
+  ))
 
 
 dashboardPage(header,
-              dashboardSidebar(disable = TRUE),
-              body)
+  dashboardSidebar(disable = TRUE),
+  body)
