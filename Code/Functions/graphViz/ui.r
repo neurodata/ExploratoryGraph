@@ -33,6 +33,7 @@ body <- dashboardBody(fluidRow(
           label = "Statistics:",
           choices = c(
             "Degree",
+            "Attribute: Edge Weight",
             "Betweenness Centrality",
             "Closeness Centrality",
             "Eigenvector Centrality",
@@ -101,7 +102,7 @@ body <- dashboardBody(fluidRow(
           selected = "Adjacency"
           ),
         
-        
+
         uiOutput("caption_adjacency"),
         
         fluidRow(
@@ -111,9 +112,9 @@ body <- dashboardBody(fluidRow(
               outputId = "adjacency_view",
               height = 500,
               width = 600
-              
+
               ),
-            
+
             conditionalPanel(
               "input.embedding_sbm == true",
               plotlyOutput(
@@ -217,7 +218,7 @@ body <- dashboardBody(fluidRow(
       checkboxInput(
         inputId = "plot_scree",
         label = strong("Scree Plot"),
-        value = TRUE
+        value = FALSE
         ),
 
 

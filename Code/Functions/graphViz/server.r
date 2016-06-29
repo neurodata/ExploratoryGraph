@@ -6,12 +6,13 @@ source("opt_d.r")
 require("pairsD3")
 require("plyr")
 require("reshape")
+source("igraph2D3.r")
 
 shinyServer(function(input, output) {
-  
+
   # Read in the graph from graphml file
   graphFile <- reactive({
-    
+
     if(input$use_demo_graph)
       inFile<- "./demo.graphml"
     else
@@ -40,7 +41,7 @@ shinyServer(function(input, output) {
         ticks = T,
         step = 1,
         value = 10
-      )
+        )
     }
   })
   
@@ -53,7 +54,6 @@ shinyServer(function(input, output) {
         input$par_k_cores)
       g <- induced.subgraph(graph = g, vids = verticesHavingMaxCoreness)
     }
-
     g
   })
   
@@ -99,7 +99,7 @@ shinyServer(function(input, output) {
     # A <- Adjacency() 
 
     # if(input$svd_mat=="Adjacency")
-        svdL <- svd(Adjacency())
+    svdL <- svd(Adjacency())
     # if(input$svd_mat=="Normalized Laplacian")
       # svdL <- svd(Laplacian())
     # if(input$svd_mat=="Laplacian")
@@ -121,27 +121,29 @@ shinyServer(function(input, output) {
     graph <- graph_kcore()
     
     
-      members <- rep(1, length(V(graph)))
-      
-      if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
-        members = Cluster()$cluster
+    members <- rep(1, length(V(graph)))
+
+    if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
+      members = Cluster()$cluster
         # members<- members[coreness >= input$par_k_cores]    
     }
 
-     graph_d3 <- igraph_to_networkD3(graph, members)
-      
-      forceNetwork(
-        Links = graph_d3$links,
-        Nodes = graph_d3$nodes,
-        Source = 'source',
-        Target = 'target',
-        NodeID = 'name',
-        Group = 'group'
-        )
-    })
+    graph_d3 <- igraph2D3(graph, members)
+
+    forceNetwork(
+      Links = graph_d3$links,
+      Nodes = graph_d3$nodes,
+      Source = 'source',
+      Target = 'target',
+      NodeID = 'name',
+      Group = 'group',
+      zoom = TRUE
+      )
+  })
   
   #2nd viz:vertex stats
   output$density_dist <- renderPlotly({
+    # g<- graphFile()
     graph <- graph_kcore()
     A <- Adjacency()
 
@@ -168,14 +170,20 @@ shinyServer(function(input, output) {
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
 
-    if(input$graph_stats=="Bonacich Power Centrality"){
+      if(input$graph_stats=="Bonacich Power Centrality"){
         bw<- power_centrality(graph)
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
       
-    if(input$graph_stats=="Authority Score"){
+      if(input$graph_stats=="Authority Score"){
         bw<- authority_score(graph)$vector
+        df <- data.frame(x <- bw, group <- 1)
+        min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
+      }
+
+      if(input$graph_stats=="Attribute: Edge Weight"){
+        bw<- edge_attr(graph)$weight
         df <- data.frame(x <- bw, group <- 1)
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
@@ -233,7 +241,7 @@ shinyServer(function(input, output) {
       denseA<- subLaplacian()
       # caption <- "Laplacian: D-A"
       
-      }
+    }
     
     if(input$adjacency_mode=="Normalized Laplacian"){
       denseA<- L
@@ -256,9 +264,9 @@ shinyServer(function(input, output) {
     } 
     
     if (input$adjacency_sortedby == "Block" &
-        input$embedding_sbm
-    )   {
-      
+      input$embedding_sbm
+      )   {
+
       group_col = Cluster()$cluster
       orderByBlock = order(group_col,decreasing = F)
       denseA <- denseA[orderByBlock, orderByBlock]
@@ -318,12 +326,12 @@ shinyServer(function(input, output) {
   
   
   output$caption_adjacency <- renderUI({ 
-    
+
     if (input$adjacency_mode == "Adjacency")   {
       caption = 'Adjacency: \\(A\\)'
     }
 
-        if (input$adjacency_mode == "Laplacian")   {
+    if (input$adjacency_mode == "Laplacian")   {
       caption = 'Laplacian: \\(D-A\\)'
     }
 
@@ -335,9 +343,9 @@ shinyServer(function(input, output) {
       caption = 'Diffusion: \\(D^{-1}A\\)'
     }
 
-     
 
-      withMathJax(
+
+    withMathJax(
       helpText(caption)
       )
 
@@ -346,7 +354,7 @@ shinyServer(function(input, output) {
   output$p_hat_view <- renderPlotly({
 
     if(input$embedding_sbm){
-      
+
       if( input$embedding_model == 'Stochastic Block Model'){
         cluster<- Cluster()
         Xhat <- cluster$centers[cluster$cluster,]
@@ -355,9 +363,9 @@ shinyServer(function(input, output) {
 
       
       if( input$embedding_model == 'Random Dot Product Model'){
-        
+
         # if(input$svd_mat=="Adjacency")
-          svdL <- svd(Adjacency())
+        svdL <- svd(Adjacency())
         # if(input$svd_mat=="Normalized Laplacian")
           # svdL <- svd(Laplacian())
         # if(input$svd_mat=="Laplacian")
@@ -369,7 +377,7 @@ shinyServer(function(input, output) {
         
         p_hat <- Xhat %*% t(Xhat)
       }
-     
+
       
       if (input$adjacency_sortedby == "Degree")   {
         A <- Adjacency()
@@ -380,9 +388,9 @@ shinyServer(function(input, output) {
       
       
       if (input$adjacency_sortedby == "Block" &
-          input$embedding_sbm
-          )   {
-        
+        input$embedding_sbm
+        )   {
+
         group_col = Cluster()$cluster
         orderByBlock = order(group_col,decreasing = F)
         p_hat <- p_hat[orderByBlock, orderByBlock]
@@ -424,7 +432,7 @@ shinyServer(function(input, output) {
   #4th viz: scree plot
   output$scree_plot <-  renderPlotly({
     graph <- graph_kcore()
-   
+
 
     p<- ggplot() 
 
@@ -436,28 +444,28 @@ shinyServer(function(input, output) {
 
 
     if(input$scree_A){
-        svdL <- svd(Adjacency())
+      svdL <- svd(Adjacency())
 
-        y <- svdL$d  
-
-        df2$Adjacency = y
+      y <- svdL$d  
+      y<- y/y[1]
+      df2$Adjacency = y
     }
 
-   if(input$scree_L){
-        svdL <- svd(subLaplacian())
+    if(input$scree_L){
+      svdL <- svd(subLaplacian())
 
-        y <- svdL$d  
-
-        df2$Laplacian = y
+      y <- svdL$d  
+      y<- y/y[1]
+      df2$Laplacian = y
 
     }
 
     if(input$scree_nL){
-        svdL <- svd(Laplacian())
+      svdL <- svd(Laplacian())
 
-        y <- svdL$d  
-
-        df2$nL = y
+      y <- svdL$d  
+      y<- y/y[1]
+      df2$nL = y
     }
 
     df3 = melt(df2, id=c("index"))
@@ -465,25 +473,25 @@ shinyServer(function(input, output) {
 
     
     
-    p<- ggplot(df3) + geom_line(aes(x=index, y=value, colour=variable))    + scale_colour_discrete(name="")
+    p<- ggplot(df3) + geom_line(aes(x=index, y=value, colour=variable),linetype =1)    + scale_colour_manual(values = c('Adjacency' = "red", 'Laplacian' = "green", 'nL' = "blue"))
 
     if (input$elbow_detect) {
 
-        if(input$scree_A){
-     
-      
-          y<- df2$Adjacency
-      
+      if(input$scree_A){
+
+        y<- df2$Adjacency
+        y<- y/y[1]
 
         eb1 <- opt_d(y)
-      
+
         if (eb1 < n) {
           eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
           if (eb2 < n) {
             eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
           }
         }
-        p<- p+  geom_vline(xintercept = eb1, linetype =2, col="red")+ geom_vline(xintercept = eb2, linetype = 2, col="red")+ geom_vline(xintercept = eb3, linetype =2, col="red")
+        p<- p+  geom_vline(xintercept = c(eb1,eb2,eb3), linetype =3, col="red")
+        #+ geom_vline(xintercept = eb2, linetype = 3, col="red")  + geom_vline(xintercept = eb3, linetype =3, col="red")
       }
 
       
@@ -491,39 +499,39 @@ shinyServer(function(input, output) {
 
       
       if(input$scree_L){
-      
-      y<- df2$Laplacian
-      
 
-      eb1 <- opt_d(y)
-    
-      if (eb1 < n) {
-        eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
-        if (eb2 < n) {
-          eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+        y<- df2$Laplacian
+        y<- y/y[1]
+
+        eb1 <- opt_d(y)
+
+        if (eb1 < n) {
+          eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
+          if (eb2 < n) {
+            eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+          }
         }
+        p<- p+  geom_vline(xintercept = c(eb1,eb2,eb3), linetype =3, col="green")
       }
-      p<- p+  geom_vline(xintercept = eb1, linetype =2, col="green")+ geom_vline(xintercept = eb2, linetype = 2, col="green")+ geom_vline(xintercept = eb3, linetype =2, col="green")
-      }
 
 
- if(input$scree_nL){
-      y<- df2$nL
-   
-      
+      if(input$scree_nL){
+        y<- df2$nL
+        y<- y/y[1]
 
-      eb1 <- opt_d(y)
-    
-      if (eb1 < n) {
-        eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
-        if (eb2 < n) {
-          eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+
+        eb1 <- opt_d(y)
+
+        if (eb1 < n) {
+          eb2 <- opt_d(y[(eb1 + 1):n]) + eb1
+          if (eb2 < n) {
+            eb3 <- opt_d(y[(eb2 + 1):n]) + eb2
+          }
         }
-      }
-      p<- p+  geom_vline(xintercept = eb1, linetype =2, col="blue")+ geom_vline(xintercept = eb2, linetype = 2, col="blue")+ geom_vline(xintercept = eb3, linetype =2, col="blue")
+        p<- p+  geom_vline(xintercept = c(eb1,eb2,eb3), linetype =3, col="blue")
       }
 
-          }  
+    }  
     
     ggplotly(p)
     
@@ -549,7 +557,7 @@ shinyServer(function(input, output) {
     
 
     
-      if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
+    if(input$embedding_sbm  & input$embedding_model == 'Stochastic Block Model'){
       group_col = Cluster()$cluster
     }else{
       group_col = rep(1,nrow(A))
@@ -564,7 +572,7 @@ shinyServer(function(input, output) {
   })
   
   output$pairsplot <- renderUI({
-    pairsD3Output("pD3", width = '500px', height = '500px')
+    pairsD3Output("pD3", width = '700px', height = '700px')
   })
   
   

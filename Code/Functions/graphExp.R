@@ -1,16 +1,47 @@
 require("igraph",quietly = T)
 # require("fields")
-
+require("networkD3")
 setwd("~/git/ExploratoryGraph/Code/Functions/")
 
-graph <- read.graph("../DataIngest/p.pacificus_neural.synaptic_1.graphml",format = "graphml")
+g <- read.graph("./graphViz/demo.graphml",format = "graphml")
+
+
+get.graph.attribute(g)
+get.vertex.attribute(g)
+l <- edge_attr(g)
+
 
 # 
-# if(!is.connected(graph)){
-#   graph<-decompose.graph(graph)[[1]]
-# }
+if(!is.connected(graph)){
+  g<-decompose.graph(g)[[1]]
+}
+g <- simplify(g, remove.multiple = F, remove.loops = T) 
 
-graph <- as.undirected(graph, mode = "collapse")
+g <- as.undirected(g, mode = "collapse")
+
+# plot(g, edge.arrow.size=1,vertex.label=NA)
+
+vertex_list<- V(g)
+edge_list<- E(g)
+
+
+members <- rep(1, length(V(g)))
+
+graph_d3 <- igraph2D3(g, members)
+
+forceNetwork(
+  Links = graph_d3$links,
+  Nodes = graph_d3$nodes,
+  Source = 'source',
+  Target = 'target',
+  NodeID = 'name',
+  Group = 'group',
+  zoom = TRUE
+)
+
+
+
+
 
 
 #get adjacency
