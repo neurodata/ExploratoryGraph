@@ -61,14 +61,19 @@ shinyServer(function(input, output) {
   # get adjacency
   Adjacency <- reactive({
     graph <- graph_kcore()
+		if ('weight' %in% edge_attr_names(graph)){
+			attr = 'weight'
+		} else {
+			attr = NULL
+		}
     a<-get.adjacency(
       graph,
       type = "both",
-      attr = NULL,
+      attr = attr,
       sparse = T,
       edges = F
       )
-    A = a > 0
+    A = a #> 0
 
     A
   })
@@ -302,7 +307,7 @@ shinyServer(function(input, output) {
       
     }
     
-    vals <- unique(c(scales::rescale(c(denseA,1,0))))
+    vals <- unique(c(scales::rescale(c(denseA,max(denseA),0))))
     o <- order(vals, decreasing = FALSE)
     cols <- scales::col_numeric("Blues", domain = NULL)(vals)
     colz <- setNames(data.frame(vals[o], cols[o]), NULL)
@@ -315,7 +320,7 @@ shinyServer(function(input, output) {
 
     m<-melt(denseA)
 
-    zlim <- c(0,1)
+    zlim <- c(0,max(denseA))
 
     if(input$adjacency_mode=="Laplacian")
       zlim<- c(min(denseA),max(denseA))
