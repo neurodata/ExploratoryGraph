@@ -33,8 +33,8 @@ body <- dashboardBody(fluidRow(
             inputId = "bw_adjust_overlay",
             label = "Bandwidth adjustment:",
             min = 0.2,
-            max = 2,
-            value = .5,
+            max = 10,
+            value = 1,
             step = 0.2
             )
         
@@ -226,8 +226,15 @@ body <- dashboardBody(fluidRow(
       
       checkboxInput(
         inputId = "plot_vertex_dist",
-        label = strong("Vertex Statistics"),
+        label = strong("Vertex Attribute Conditonal Statistics"),
         value = FALSE
+        ),
+
+       conditionalPanel(
+        "input.plot_vertex_dist == true",
+        wellPanel(
+          p("Select Attribute:"),
+          uiOutput("AttributeSelect"))
         ),
 
       

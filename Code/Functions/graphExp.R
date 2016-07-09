@@ -3,26 +3,36 @@ require("igraph",quietly = T)
 require("networkD3")
 setwd("~/git/ExploratoryGraph/Code/Functions/")
 
-g <- read.graph("./graphViz/demo.graphml",format = "graphml")
+g <- read.graph("./graphViz/demo2.graphml",format = "graphml")
 
 
 get.graph.attribute(g)
-get.vertex.attribute(g)
+
+vertexAtt<- get.vertex.attribute(g)
+
+
+get.edge.attribute(g)
+
+
+names(vertexAtt)
+
 l <- edge_attr(g)
 length(l)
 
 require("ggplot2")
 
 dg<- degree(g)
-group<-c(rep(1,35),rep(2,35))
+group<- vertexAtt$role
 df <- data.frame(x <- dg, group <- factor(group))
 names(df)<- c("x","group")
 p <- ggplot(df, aes(x=x, fill=group)) +
   geom_histogram(
-    position="identity",binwidth = 1,
+    position="identity",binwidth = 20,
   alpha=.5
   )
 p
+
+
 # 
 if(!is.connected(graph)){
   g<-decompose.graph(g)[[1]]

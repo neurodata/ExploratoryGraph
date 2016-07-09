@@ -14,7 +14,7 @@ shinyServer(function(input, output) {
   graphFile <- reactive({
 
     if(input$use_demo_graph)
-      inFile<- "./demo.graphml"
+      inFile<- "./demo2.graphml"
     else
       inFile<-input$file1$datapath
     
@@ -141,23 +141,73 @@ shinyServer(function(input, output) {
       )
   })
 
-  # vertex stats
+  # # vertex stats
+  # output$vertex_dist <- renderPlotly({
+
+  #   graph <- graph_kcore()
+  #   dg <- degree(graph)
+
+  #   block<- rep(1, length(dg))
+
+  #   if(      input$embedding_sbm){
+  #   block <- Cluster()$cluster
+  #   }
+
+  #   df <- data.frame(x <- dg, block <- factor(block))
+  #   names(df)<- c("x","block")
+
+
+  #   p <- ggplot(df, aes(x=x, fill=block)) + geom_density(alpha = 0.7, bw = input$bw_adjust_overlay)+   ggtitle("Degree in each Block")
+
+  #   # geom_histogram(
+  #   #  position="identity",
+  #   #   aes(y = ..density..),
+  #   #     alpha = 0.7,
+  #   #     binwidth = 1
+  #   #   )  
+  #   ggplotly(p)
+
+
+  # })
+
+  output$AttributeSelect <- renderUI({
+    graph <- graphFile()
+    vertexAtt<- get.vertex.attribute(graph)
+    count<- lapply(vertexAtt, function(x){length(unique(x))})
+    nameAtt<- names(vertexAtt)
+    pickAtt<- nameAtt[(count<10 & count>=2)]
+
+    selectInput(
+        inputId = "pickAttribute",
+        label = "Pick attributes",
+        choices =  pickAtt ,
+        selected = pickAtt[1]
+        )
+  })
+
+
+    # attributes condtional stats
   output$vertex_dist <- renderPlotly({
 
     graph <- graph_kcore()
     dg <- degree(graph)
 
-    block<- rep(1, length(dg))
+    vertexAtt<- get.vertex.attribute(graph)
 
-    if(      input$embedding_sbm){
-    block <- Cluster()$cluster
-    }
+    Attribute <- vertexAtt[[input$pickAttribute]]
 
-    df <- data.frame(x <- dg, block <- factor(block))
-    names(df)<- c("x","block")
+    countAttribute<- table(Attribute)
+
+    namesWithCountSmallerThan5<- names(countAttribute[countAttribute <=5])
+
+    Attribute[Attribute %in% namesWithCountSmallerThan5]<- paste("Others: ", paste(namesWithCountSmallerThan5, collapse = ',') , collapse = " ")
 
 
-    p <- ggplot(df, aes(x=x, fill=block)) + geom_density(alpha = 0.7, adjust = input$bw_adjust_overlay)+   ggtitle("Degree in each Block")
+    df <- data.frame(x <- dg, Attribute <- factor(Attribute))
+    names(df)<- c("x","attribute")
+
+
+    p <- ggplot(df, aes(x=x, fill=Attribute)) + geom_density(alpha = 0.7, bw = input$bw_adjust_overlay)+   ggtitle("Degree")
 
     # geom_histogram(
     #  position="identity",
@@ -242,7 +292,7 @@ shinyServer(function(input, output) {
       p <-
       p + stat_density(fill = "skyblue",
        alpha = 0.5,
-       adjust = input$bw_adjust)
+       bw = input$bw_adjust)
     }
     
     if (input$plot_degree) {
