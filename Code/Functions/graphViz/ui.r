@@ -25,20 +25,9 @@ body <- dashboardBody(fluidRow(
     box(
       width = NULL,
       solidHeader = TRUE,
-      conditionalPanel(
-        "input.plot_vertex_dist == true",
-                
-        plotlyOutput(outputId = "vertex_dist", height = "300px"),
-         sliderInput(
-            inputId = "bw_adjust_overlay",
-            label = "Bandwidth adjustment:",
-            min = 0.2,
-            max = 10,
-            value = 1,
-            step = 0.2
-            )
-        
-      )),
+     
+
+
     ##end  distribution
 
 
@@ -56,7 +45,7 @@ body <- dashboardBody(fluidRow(
           label = "Statistics:",
           choices = c(
             "Degree",
-            "Attribute: Edge Weight",
+            # "Attribute: Edge Weight",
             "Betweenness Centrality",
             "Closeness Centrality",
             "Eigenvector Centrality",
@@ -66,46 +55,82 @@ body <- dashboardBody(fluidRow(
           selected = "Degree"
           ),
         
-        plotlyOutput(outputId = "density_dist", height = "300px"),
-        
-        checkboxInput(
-          inputId = "show_histogram",
-          label = strong("Show histogram"),
-          value = FALSE
-          ),
-        
-        #show this only if we bin the observations and show it in histogram
-        conditionalPanel(
-          condition = "input.show_histogram == true",
-          sliderInput(
-            inputId = "hist_number_bins",
-            label = "No. of Bins:",
-            min = 1,
-            max = 20,
-            ticks = F,
-            step = 1,
-            value = 10
-            )
-          ),
-        
-        checkboxInput(
-          inputId = "density",
-          label = strong("Show density estimate"),
-          value = FALSE
-          ),
-        
-        # Display this only if the density is shown
-        conditionalPanel(
-          condition = "input.density == true",
-          sliderInput(
-            inputId = "bw_adjust",
+        # conditionalPanel(
+          # "input.vertex_conditional == false",
+          # plotlyOutput(outputId = "density_dist", height = "300px"),
+        # ) ,
+
+        # conditionalPanel(
+        # "input.vertex_conditional == true",
+                
+        plotlyOutput(outputId = "vertex_dist", height = "300px"),
+         sliderInput(
+            inputId = "bw_adjust_overlay",
             label = "Bandwidth adjustment:",
             min = 0.2,
-            max = 1,
-            value = .5,
+            max = 10,
+            value = 1,
             step = 0.2
-            )
-          )
+            ),
+        # ),
+
+
+        
+        # checkboxInput(
+        #   inputId = "show_histogram",
+        #   label = strong("Show histogram"),
+        #   value = FALSE
+        #   ),
+        
+        # #show this only if we bin the observations and show it in histogram
+        # conditionalPanel(
+        #   condition = "input.show_histogram == true",
+        #   sliderInput(
+        #     inputId = "hist_number_bins",
+        #     label = "No. of Bins:",
+        #     min = 1,
+        #     max = 20,
+        #     ticks = F,
+        #     step = 1,
+        #     value = 10
+        #     )
+        #   ),
+        
+        # checkboxInput(
+        #   inputId = "density",
+        #   label = strong("Show density estimate"),
+        #   value = FALSE
+        #   ),
+        
+        # # Display this only if the density is shown
+        # conditionalPanel(
+        #   condition = "input.density == true",
+        #   sliderInput(
+        #     inputId = "bw_adjust",
+        #     label = "Bandwidth adjustment:",
+        #     min = 0.2,
+        #     max = 1,
+        #     value = .5,
+        #     step = 0.2
+        #     )
+        #   ),
+
+        checkboxInput(
+        inputId = "vertex_conditional",
+        label = strong("Conditonal on Vertex Attribute "),
+        value = FALSE
+        ),
+
+        conditionalPanel(
+        "input.vertex_conditional == true",
+        wellPanel(
+          p("Select Attribute:"),
+          uiOutput("AttributeSelect"))
+        )
+
+       
+      )
+
         )
       ),
     ##end  distribution
@@ -224,18 +249,9 @@ body <- dashboardBody(fluidRow(
       
       
       
-      checkboxInput(
-        inputId = "plot_vertex_dist",
-        label = strong("Vertex Attribute Conditonal Statistics"),
-        value = FALSE
-        ),
+     
 
-       conditionalPanel(
-        "input.plot_vertex_dist == true",
-        wellPanel(
-          p("Select Attribute:"),
-          uiOutput("AttributeSelect"))
-        ),
+      
 
       
       checkboxInput(

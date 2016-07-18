@@ -190,24 +190,54 @@ shinyServer(function(input, output) {
   output$vertex_dist <- renderPlotly({
 
     graph <- graph_kcore()
-    dg <- degree(graph)
 
-    vertexAtt<- get.vertex.attribute(graph)
+     if(input$graph_stats=="Degree"){
+        bw <- degree(graph)
+      }
+      if(input$graph_stats=="Betweenness Centrality"){
+        bw <- betweenness(graph)
 
-    Attribute <- vertexAtt[[input$pickAttribute]]
+      }
+      if(input$graph_stats=="Closeness Centrality"){
+        bw <- closeness(graph)
 
-    countAttribute<- table(Attribute)
+      }
+      if(input$graph_stats=="Eigenvector Centrality"){
+        eg<- evcent(graph)
+        bw <- eg$vector
 
-    namesWithCountSmallerThan5<- names(countAttribute[countAttribute <=5])
+      }
 
-    Attribute[Attribute %in% namesWithCountSmallerThan5]<- paste("Others: ", paste(namesWithCountSmallerThan5, collapse = ',') , collapse = " ")
+      if(input$graph_stats=="Bonacich Power Centrality"){
+        bw<- power_centrality(graph)
+
+      }
+      
+      if(input$graph_stats=="Authority Score"){
+        bw<- authority_score(graph)$vector
+      }
 
 
-    df <- data.frame(x <- dg, Attribute <- factor(Attribute))
+    Attribute<- rep("overall", length(V(graph)))
+    if(input$vertex_conditional){
+
+      vertexAtt<- get.vertex.attribute(graph)
+
+      Attribute <- vertexAtt[[input$pickAttribute]]
+
+      countAttribute<- table(Attribute)
+
+      namesWithCountSmallerThan5<- names(countAttribute[countAttribute <=5])
+
+      Attribute[Attribute %in% namesWithCountSmallerThan5]<- paste("Others: ", paste(namesWithCountSmallerThan5, collapse = ',') , collapse = " ")
+    }
+
+
+    df <- data.frame(x <- bw, Attribute <- factor(Attribute))
     names(df)<- c("x","attribute")
 
 
-    p <- ggplot(df, aes(x=x, fill=Attribute)) + geom_density(alpha = 0.7, bw = input$bw_adjust_overlay)+   ggtitle("Degree")
+    p <- ggplot(df, aes(x=x, fill=Attribute)) + geom_density(alpha = 0.7, bw = input$bw_adjust_overlay)+   ggtitle(input$graph_stats)
 
     # geom_histogram(
     #  position="identity",
@@ -261,11 +291,11 @@ shinyServer(function(input, output) {
         min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
       }
 
-      if(input$graph_stats=="Attribute: Edge Weight"){
-        bw<- edge_attr(graph)$weight
-        df <- data.frame(x <- bw, group <- 1)
-        min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
-      }
+      # if(input$graph_stats=="Attribute: Edge Weight"){
+      #   bw<- edge_attr(graph)$weight
+      #   df <- data.frame(x <- bw, group <- 1)
+      #   min_binwidth = (quantile(bw,0.9)-quantile(bw,0.1))/10
+      # }
 
       p <- ggplot(df, aes(x)) +
       geom_histogram(
